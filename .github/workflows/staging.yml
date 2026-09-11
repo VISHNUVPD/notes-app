@@ -36,6 +36,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update CHANGELOG.md Automatically
+        run: |
+          python scripts/update_changelog.py
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): auto-update CHANGELOG.md [skip ci]" || echo "No changelog changes"
+
       - name: Run Ansible Staging Deployment with Automated Smoke Test & Rollback
         env:
           IMAGE_TAG: "staging-${{ github.sha }}"
