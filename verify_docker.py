@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.parse
 import json
+import time
 
 BASE_URL = "http://localhost:5000"
 
@@ -10,11 +11,20 @@ def test_live_docker_stack():
     print("  VERIFYING LIVE DOCKER STACK (FLASK + POSTGRESQL + MISTUNE)")
     print("=" * 65)
 
-    # 1. Test Health Endpoint
+    # 1. Test Health Endpoint (with retry loop for container warmup)
     print("\n[1/4] Querying /health endpoint on Docker container...")
-    req = urllib.request.urlopen(f"{BASE_URL}/health", timeout=5)
-    assert req.status == 200, f"Health check failed with status {req.status}"
-    health_data = json.loads(req.read().decode('utf-8'))
+    health_data = None
+    for attempt in range(1, 10):
+        try:
+            req = urllib.request.urlopen(f"{BASE_URL}/health", timeout=5)
+            if req.status == 200:
+                health_data = json.loads(req.read().decode('utf-8'))
+                if health_data.get('status') == 'healthy':
+                    break
+        except Exception:
+            time.sleep(1)
+
+    assert health_data is not None, "Container failed to respond on /health"
     print(f"      Response: {health_data}")
     assert health_data['status'] == 'healthy'
     assert health_data['database'] == 'connected'

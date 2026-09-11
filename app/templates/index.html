@@ -4,163 +4,288 @@
 
 {% block content %}
 <style>
+    /* Page Header & Search Bar */
     .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.75rem;
         flex-wrap: wrap;
         gap: 1rem;
     }
 
-    .page-title {
-        font-size: 1.75rem;
+    .page-title-group h1 {
+        font-size: 1.5rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--text-main);
+        letter-spacing: -0.02em;
     }
 
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.2rem;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        background: var(--surface-1);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 0.2rem 0.4rem 0.2rem 0.75rem;
+        transition: var(--transition);
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .search-form:focus-within {
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-icon {
+        color: var(--text-faint);
+        font-size: 0.85rem;
+        margin-right: 0.45rem;
+    }
+
+    .search-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-main);
+        font-size: 0.875rem;
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .search-input::placeholder {
+        color: var(--text-faint);
+    }
+
+    .search-btn-clear {
+        background: none;
+        border: none;
+        color: var(--text-faint);
+        cursor: pointer;
+        padding: 0.25rem 0.45rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .search-btn-clear:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Notes Grid */
     .notes-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
+        gap: 1.25rem;
     }
 
     .note-card {
-        background: var(--bg-card);
-        backdrop-filter: blur(8px);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        background: var(--surface-1);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 1.35rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: all 0.25s ease;
+        transition: var(--transition);
+        position: relative;
     }
 
     .note-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(99, 102, 241, 0.4);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-md);
+    }
+
+    .note-card-header {
+        margin-bottom: 0.75rem;
+    }
+
+    .note-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: var(--text-faint);
+        margin-bottom: 0.45rem;
+    }
+
+    .note-id-badge {
+        background: rgba(255, 255, 255, 0.04);
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
     }
 
     .note-card-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #fff;
+        color: var(--text-main);
+        line-height: 1.4;
+        letter-spacing: -0.01em;
     }
 
     .note-card-title a {
         color: inherit;
         text-decoration: none;
+        transition: var(--transition);
     }
 
     .note-card-title a:hover {
-        color: var(--accent-primary);
+        color: var(--accent-light);
     }
 
     .note-card-preview {
-        color: var(--text-secondary);
-        font-size: 0.92rem;
-        line-height: 1.5;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        line-height: 1.55;
         margin-bottom: 1.25rem;
-        max-height: 120px;
+        max-height: 90px;
         overflow: hidden;
         position: relative;
-    }
-
-    .note-card-meta {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: space-between;
+        mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
     }
 
     .note-card-actions {
         display: flex;
+        align-items: center;
         gap: 0.5rem;
-        border-top: 1px solid var(--border-color);
-        padding-top: 1rem;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 0.85rem;
+        margin-top: auto;
     }
 
+    /* Proportional Compact Empty State */
     .empty-state {
         text-align: center;
-        padding: 4rem 2rem;
-        background: var(--bg-card);
-        border-radius: 12px;
-        border: 1px dashed var(--border-color);
+        padding: 3rem 1.5rem;
+        background: var(--surface-1);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        max-width: 480px;
+        margin: 2rem auto;
+        box-shadow: var(--shadow-sm);
     }
 
-    .empty-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
+    .empty-icon-box {
+        width: 56px;
+        height: 56px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        color: var(--accent-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin: 0 auto 1.25rem auto;
     }
 
     .empty-title {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        color: var(--text-main);
+        margin-bottom: 0.4rem;
     }
 
     .empty-subtitle {
-        color: var(--text-secondary);
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
         margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .search-form {
+            max-width: 100%;
+        }
+        .notes-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
+<!-- Page Header with Title and Search Input -->
 <div class="page-header">
-    <div>
-        <h1 class="page-title">My Notes</h1>
-        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    <div class="page-title-group">
+        <h1>My Notes</h1>
+        <p class="page-subtitle">
             {{ notes|length }} note{% if notes|length != 1 %}s{% endif %} {% if search_query %}matching "{{ search_query }}"{% else %}stored in database{% endif %}
         </p>
     </div>
-    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-        <form action="{{ url_for('index') }}" method="GET" style="display: flex; gap: 0.5rem;">
-            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search notes..." style="background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.85rem; color: #fff; font-size: 0.9rem; width: 180px;">
-            <button type="submit" class="btn btn-secondary" style="padding: 0.5rem 0.85rem;">🔍</button>
-            {% if search_query %}
-                <a href="{{ url_for('index') }}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem;" title="Clear search">✕</a>
-            {% endif %}
-        </form>
-        <a href="{{ url_for('create_note') }}" class="btn btn-primary">+ Create Note</a>
-    </div>
+
+    <!-- Integrated Search Bar -->
+    <form action="{{ url_for('index') }}" method="GET" class="search-form" role="search">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search notes..." class="search-input" aria-label="Search notes">
+        {% if search_query %}
+            <a href="{{ url_for('index') }}" class="search-btn-clear" title="Clear search" aria-label="Clear search">✕</a>
+        {% endif %}
+    </form>
 </div>
 
+<!-- Notes Grid / List -->
 {% if notes %}
 <div class="notes-grid">
     {% for note in notes %}
-    <div class="note-card" id="note-card-{{ note.id }}">
+    <article class="note-card" id="note-card-{{ note.id }}">
         <div>
-            <div class="note-card-meta">
-                <span>Updated {{ note.updated_at.strftime('%b %d, %Y') }}</span>
-                <span>#{{ note.id }}</span>
+            <div class="note-card-header">
+                <div class="note-card-meta">
+                    <span>{{ note.updated_at.strftime('%b %d, %Y') }}</span>
+                    <span class="note-id-badge">#{{ note.id }}</span>
+                </div>
+                <h2 class="note-card-title">
+                    <a href="{{ url_for('view_note', note_id=note.id) }}">{{ note.title }}</a>
+                </h2>
             </div>
-            <h2 class="note-card-title">
-                <a href="{{ url_for('view_note', note_id=note.id) }}">{{ note.title }}</a>
-            </h2>
+            
             <div class="note-card-preview markdown-body">
                 {{ note.render_content_html() | safe }}
             </div>
         </div>
 
         <div class="note-card-actions">
-            <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.85rem;">View</a>
-            <a href="{{ url_for('edit_note', note_id=note.id) }}" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.85rem;">Edit</a>
-            <form action="{{ url_for('delete_note', note_id=note.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this note?');">
-                <button type="submit" class="btn btn-danger" style="font-size: 0.85rem; padding: 0.55rem 0.85rem;">Delete</button>
-            </form>
+            <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">View</a>
+            <a href="{{ url_for('edit_note', note_id=note.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">Edit</a>
+            <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('delete_note', note_id=note.id) }}', '{{ note.title | escape }}')">Delete</button>
         </div>
-    </div>
+    </article>
     {% endfor %}
 </div>
 {% else %}
+<!-- Proportional Compact Empty State -->
 <div class="empty-state">
-    <div class="empty-icon">📂</div>
+    <div class="empty-icon-box" aria-hidden="true">📝</div>
     <h2 class="empty-title">No notes found</h2>
-    <p class="empty-subtitle">Start by creating your very first Markdown note.</p>
-    <a href="{{ url_for('create_note') }}" class="btn btn-primary">+ Create First Note</a>
+    <p class="empty-subtitle">
+        {% if search_query %}
+            No notes match your search "{{ search_query }}". Try clearing the filter.
+        {% else %}
+            No notes yet. Create your first markdown note to get started.
+        {% endif %}
+    </p>
+    {% if search_query %}
+        <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Clear Search</a>
+    {% else %}
+        <a href="{{ url_for('create_note') }}" class="btn btn-primary btn-sm">+ Create First Note</a>
+    {% endif %}
 </div>
 {% endif %}
 {% endblock %}
