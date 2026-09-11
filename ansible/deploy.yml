@@ -10,6 +10,10 @@
     previous_image_tag: "{{ lookup('env', 'PREVIOUS_IMAGE_TAG') | default('latest', true) }}"
     staging_port: 5001
     health_endpoint: "http://localhost:{{ staging_port }}/health"
+    # Secrets defaulted or loaded securely from Ansible Vault
+    db_user: "{{ vault_postgres_user | default(lookup('env', 'POSTGRES_USER') | default('notes_user', true)) }}"
+    db_password: "{{ vault_postgres_password | default(lookup('env', 'POSTGRES_PASSWORD') | default('notes_password', true)) }}"
+    db_name: "{{ vault_postgres_db | default(lookup('env', 'POSTGRES_DB') | default('notes_db', true)) }}"
 
   tasks:
     - name: Record deployment metadata
