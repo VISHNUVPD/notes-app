@@ -136,8 +136,10 @@ def create_app(test_config=None):
     return app
 
 
+# Expose top-level WSGI Flask instance for Vercel, Gunicorn, and serverless runtimes
+app = create_app()
+
 # Application entrypoint when running directly
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
