@@ -48,9 +48,7 @@ def sample_note(app):
         )
         db.session.add(note)
         db.session.commit()
-        # Touch all attributes to load them into Python memory before expunging
-        note_id = note.id
-        note_title = note.title
-        note_content = note.content
+        # Touch attributes to load into memory
+        _ = (note.id, note.title, note.content)
         db.session.expunge(note)
         return note

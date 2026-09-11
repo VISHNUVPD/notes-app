@@ -149,3 +149,24 @@ def test_api_get_notes(client, sample_note):
     assert data[0]['title'] == 'Initial Test Note'
     assert 'rendered_html' in data[0]
     assert '<strong>bold text</strong>' in data[0]['rendered_html']
+
+
+def test_search_notes(client, app):
+    """Test search filtering by title and content keyword."""
+    with app.app_context():
+        note1 = Note(title='Docker and Kubernetes Notes', content='Container orchestration notes')
+        note2 = Note(title='Python Flask Tips', content='Web development guide')
+        db.session.add_all([note1, note2])
+        db.session.commit()
+
+    # Search for "Docker" in title
+    res = client.get('/?q=Docker')
+    assert res.status_code == 200
+    assert b'Docker and Kubernetes Notes' in res.data
+    assert b'Python Flask Tips' not in res.data
+
+    # Search for "guide" in content
+    res = client.get('/?q=guide')
+    assert res.status_code == 200
+    assert b'Python Flask Tips' in res.data
+    assert b'Docker and Kubernetes Notes' not in res.data

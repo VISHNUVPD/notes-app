@@ -1,11 +1,12 @@
 import os
-import sys
 
 # Configure in-memory SQLite for self-contained testing
 os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
 
-from app.app import create_app
-from app.models import db, Note
+# Imports after environment configuration
+from app.app import create_app  # noqa: E402
+from app.models import db, Note  # noqa: E402
+
 
 def run_tests():
     print("=" * 60)
@@ -25,7 +26,13 @@ def run_tests():
         # Test 2: Note Creation via POST
         res = client.post('/notes/new', data={
             'title': 'DevOps Pipeline Architecture',
-            'content': '# CI/CD Overview\n\n**Flask + Postgres** with `mistune`.\n\n| Phase | Tool |\n|---|---|\n| CI | GitHub Actions |'
+            'content': (
+                "# CI/CD Overview\n\n"
+                "**Flask + Postgres** with `mistune`.\n\n"
+                "| Phase | Tool |\n"
+                "|---|---|\n"
+                "| CI | GitHub Actions |"
+            )
         }, follow_redirects=True)
         assert res.status_code == 200, f"Expected 200, got {res.status_code}"
         print(" [PASS] 2. Note creation (POST /notes/new) succeeded")
@@ -67,6 +74,7 @@ def run_tests():
     print("=" * 60)
     print("  ALL PHASE 1 CAPABILITIES TESTED & VERIFIED!")
     print("=" * 60)
+
 
 if __name__ == '__main__':
     run_tests()
