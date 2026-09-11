@@ -113,10 +113,19 @@
     <div>
         <h1 class="page-title">My Notes</h1>
         <p style="color: var(--text-secondary); font-size: 0.95rem;">
-            {{ notes|length }} note{% if notes|length != 1 %}s{% endif %} stored in database
+            {{ notes|length }} note{% if notes|length != 1 %}s{% endif %} {% if search_query %}matching "{{ search_query }}"{% else %}stored in database{% endif %}
         </p>
     </div>
-    <a href="{{ url_for('create_note') }}" class="btn btn-primary">+ Create Note</a>
+    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <form action="{{ url_for('index') }}" method="GET" style="display: flex; gap: 0.5rem;">
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search notes..." style="background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.85rem; color: #fff; font-size: 0.9rem; width: 180px;">
+            <button type="submit" class="btn btn-secondary" style="padding: 0.5rem 0.85rem;">🔍</button>
+            {% if search_query %}
+                <a href="{{ url_for('index') }}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem;" title="Clear search">✕</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('create_note') }}" class="btn btn-primary">+ Create Note</a>
+    </div>
 </div>
 
 {% if notes %}
