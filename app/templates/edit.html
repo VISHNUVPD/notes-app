@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Edit: {{ note.title }} - Markdown Notes App{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        background: #090d16;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        color: #fff;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-textarea {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.95rem;
+        min-height: 250px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<div class="form-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.5rem;">✏️ Edit Note #{{ note.id }}</h1>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">
+            Created: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </span>
+    </div>
+
+    <form action="{{ url_for('edit_note', note_id=note.id) }}" method="POST">
+        <div class="form-group">
+            <label for="title" class="form-label">Note Title</label>
+            <input type="text" id="title" name="title" class="form-input" value="{{ note.title }}" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="content" class="form-label">Markdown Content</label>
+            <textarea id="content" name="content" class="form-textarea" required>{{ note.content }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Note</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

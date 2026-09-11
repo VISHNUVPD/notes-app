@@ -1,0 +1,50 @@
+services:
+  # 1. Web Application Service (Flask + Gunicorn)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: notes-app:latest
+    container_name: notes-web
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-5000}:5000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-notes_user}:${POSTGRES_PASSWORD:-notes_password}@db:5432/${POSTGRES_DB:-notes_db}
+      - SECRET_KEY=${SECRET_KEY:-super-secret-dev-key}
+      - FLASK_ENV=${FLASK_ENV:-development}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - notes-net
+
+  # 2. Database Service (PostgreSQL 16)
+  db:
+    image: postgres:16-alpine
+    container_name: notes-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-notes_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notes_password}
+      POSTGRES_DB: ${POSTGRES_DB:-notes_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notes_user} -d ${POSTGRES_DB:-notes_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - notes-net
+
+# Persistent Storage for PostgreSQL
+volumes:
+  postgres_data:
+    name: notes_postgres_data
+
+# Private Bridge Network for Container DNS & Communication
+networks:
+  notes-net:
+    driver: bridge

@@ -1,0 +1,16 @@
+# Production Environment Override (Runs on port 5000 with production settings)
+services:
+  web:
+    container_name: notes-web-prod
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - APP_ENV=production
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+  db:
+    container_name: notes-db-prod

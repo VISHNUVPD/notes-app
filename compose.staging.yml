@@ -1,0 +1,11 @@
+# Staging Environment Override (Runs on port 5001)
+services:
+  web:
+    container_name: notes-web-staging
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_ENV=staging
+      - APP_ENV=staging
+  db:
+    container_name: notes-db-staging
