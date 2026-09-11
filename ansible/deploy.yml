@@ -1,0 +1,59 @@
+---
+- name: Deploy Notes Application to Staging
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    image_name: "{{ lookup('env', 'IMAGE_NAME') | default('notes-app', true) }}"
+    image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('latest', true) }}"
+    previous_image_tag: "{{ lookup('env', 'PREVIOUS_IMAGE_TAG') | default('latest', true) }}"
+    staging_port: 5001
+    health_endpoint: "http://localhost:{{ staging_port }}/health"
+
+  tasks:
+    - name: Record deployment metadata
+      ansible.builtin.debug:
+        msg: "Deploying {{ image_name }}:{{ image_tag }} to Staging (Port {{ staging_port }})"
+
+    - name: Deployment and Smoke Test Block
+      block:
+        - name: Restart staging stack with new image tag
+          ansible.builtin.shell: |
+            docker compose -f docker-compose.yml -f compose.staging.yml down
+            docker compose -f docker-compose.yml -f compose.staging.yml up -d --build
+          environment:
+            APP_PORT: "{{ staging_port }}"
+            FLASK_ENV: "staging"
+          register: compose_output
+
+        - name: Wait for Staging container to initialize
+          ansible.builtin.pause:
+            seconds: 5
+
+        - name: Run Automated Smoke Test against /health endpoint
+          ansible.builtin.uri:
+            url: "{{ health_endpoint }}"
+            method: GET
+            status_code: 200
+            return_content: true
+          register: smoke_test_result
+          until: smoke_test_result.status == 200 and 'healthy' in smoke_test_result.content
+          retries: 10
+          delay: 3
+
+        - name: Smoke test passed
+          ansible.builtin.debug:
+            msg: "✅ Smoke test PASSED on Staging! Application is healthy: {{ smoke_test_result.json }}"
+
+      rescue:
+        - name: Smoke test failed - initiate automatic rollback
+          ansible.builtin.debug:
+            msg: "🚨 CRITICAL: Smoke test FAILED on {{ health_endpoint }}! Triggering automated rollback..."
+
+        - name: Execute Automated Rollback Playbook
+          ansible.builtin.include_tasks: rollback.yml
+
+        - name: Fail the deployment workflow
+          ansible.builtin.fail:
+            msg: "Deployment failed smoke test on staging and was automatically rolled back to {{ previous_image_tag }}."
