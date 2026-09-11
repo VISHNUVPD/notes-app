@@ -170,4 +170,3 @@ def test_search_notes(client, app):
     assert res.status_code == 200
     assert b'Python Flask Tips' in res.data
     assert b'Docker and Kubernetes Notes' not in res.data
-

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from dotenv import load_dotenv
 from app.models import db, Note
 
@@ -63,10 +63,11 @@ def create_app(test_config=None):
     def index():
         search_query = request.args.get('q', '').strip()
         if search_query:
-            notes = Note.query.filter(
-                (Note.title.ilike(f'%{search_query}%')) | 
-                (Note.content.ilike(f'%{search_query}%'))
-            ).order_by(Note.updated_at.desc()).all()
+            filter_condition = (
+                Note.title.ilike(f'%{search_query}%')
+                | Note.content.ilike(f'%{search_query}%')
+            )
+            notes = Note.query.filter(filter_condition).order_by(Note.updated_at.desc()).all()
         else:
             notes = Note.query.order_by(Note.updated_at.desc()).all()
         return render_template('index.html', notes=notes, search_query=search_query)

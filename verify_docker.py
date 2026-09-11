@@ -1,9 +1,9 @@
 import urllib.request
 import urllib.parse
 import json
-import time
 
 BASE_URL = "http://localhost:5000"
+
 
 def test_live_docker_stack():
     print("=" * 65)
@@ -24,7 +24,12 @@ def test_live_docker_stack():
     print("\n[2/4] Testing Note Creation (POST /notes/new)...")
     post_data = urllib.parse.urlencode({
         'title': 'Docker Architecture Notes',
-        'content': '## Multi-Container Stack\n- **Flask**: Port 5000\n- **PostgreSQL**: Port 5432\n- **Network**: Bridge `notes-net`'
+        'content': (
+            "## Multi-Container Stack\n"
+            "- **Flask**: Port 5000\n"
+            "- **PostgreSQL**: Port 5432\n"
+            "- **Network**: Bridge `notes-net`"
+        )
     }).encode('utf-8')
 
     create_req = urllib.request.Request(f"{BASE_URL}/notes/new", data=post_data, method='POST')
@@ -56,6 +61,7 @@ def test_live_docker_stack():
     print("\n" + "=" * 65)
     print("  ALL DOCKER INTEGRATION CHECKS PASSED SUCCESSFULLY!")
     print("=" * 65)
+
 
 if __name__ == '__main__':
     test_live_docker_stack()
