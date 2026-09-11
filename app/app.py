@@ -58,11 +58,18 @@ def create_app(test_config=None):
 
     # --- Routes for CRUD Operations ---
 
-    # 1. READ ALL: Home page listing all notes
+    # 1. READ ALL: Home page listing all notes (with optional search filter)
     @app.route('/')
     def index():
-        notes = Note.query.order_by(Note.updated_at.desc()).all()
-        return render_template('index.html', notes=notes)
+        search_query = request.args.get('q', '').strip()
+        if search_query:
+            notes = Note.query.filter(
+                (Note.title.ilike(f'%{search_query}%')) | 
+                (Note.content.ilike(f'%{search_query}%'))
+            ).order_by(Note.updated_at.desc()).all()
+        else:
+            notes = Note.query.order_by(Note.updated_at.desc()).all()
+        return render_template('index.html', notes=notes, search_query=search_query)
 
     # 2. CREATE: Form & submission handler for creating a note
     @app.route('/notes/new', methods=['GET', 'POST'])
